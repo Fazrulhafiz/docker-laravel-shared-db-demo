@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+    app:
+        image: serversideup/php:8.1-fpm-nginx
+        working_dir: /var/www/html
+
+    mariadb:
+        image: mariadb:10.7
+
+    node:
+        image: node:lts

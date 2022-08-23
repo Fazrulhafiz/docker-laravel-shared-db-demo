@@ -1,0 +1,51 @@
+version: "3.8"
+services:
+  mariadb:
+    networks:
+      - web-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: "rootpassword"
+      MARIADB_DATABASE: "laravel"
+      MARIADB_USER: "example-app-user"
+      MARIADB_PASSWORD: "example-app-password"
+    volumes:
+      # Add volume for all database files
+      - ./_volumes/mysql/database_data/:/var/lib/mysql
+      # Add volume for custom configurations
+      - ./_volumes/mysql/conf.d/:/etc/mysql/conf.d
+      - ./_volumes/mysql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
+    ports:
+      - target: 3306
+        published: 33061
+        mode: host
+
+  app:
+    environment:
+      - PUID=1001
+      - PGID=1002
+    networks:
+      - web-dev
+    ports:
+      # Listen on port 80, default for HTTP
+      - target: 80
+        published: 8081
+        mode: host
+      # Listen on port 443, default for HTTPS
+      - target: 443
+        published: 443
+        mode: host
+    volumes:
+      - .:/var/www/html/:cached
+    depends_on:
+      - "mariadb"
+
+  node:
+    networks:
+      - web-dev
+    volumes:
+      - .:/usr/src/app/:cached
+    working_dir: /usr/src/app/
+
+networks:
+  web-dev:
+    name: shared-network
