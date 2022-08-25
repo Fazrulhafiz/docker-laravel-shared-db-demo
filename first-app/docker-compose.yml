@@ -3,9 +3,33 @@ services:
     app:
         image: serversideup/php:8.1-fpm-nginx
         working_dir: /var/www/html
-
-    mariadb:
-        image: mariadb:10.7
+        environment:
+            - PUID=1001
+            - PGID=1002
+        networks:
+            - web-dev
+        ports:
+            # Listen on port 80, default for HTTP
+            - target: 80
+              published: 8081
+              mode: host
+            # Listen on port 443, default for HTTPS
+            - target: 443
+              published: 443
+              mode: host
+        volumes:
+            - .:/var/www/html/:cached
+        depends_on:
+            - "mariadb"
 
     node:
         image: node:lts
+        networks:
+            - web-dev
+        volumes:
+            - .:/usr/src/app/:cached
+        working_dir: /usr/src/app/
+
+networks:
+    web-dev:
+        name: shared-network
